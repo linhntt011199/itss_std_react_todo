@@ -7,7 +7,10 @@ const firebaseConfig = {
   messagingSenderId: "436441747989",
   appId: "1:436441747989:web:c116e095fa52f7d9c6741c"
 };
-firebase.initializeApp(firebaseConfig);
+// firebase.initializeApp(firebaseConfig);
+!firebase.apps.length ? firebase.initializeApp(firebaseConfig) : firebase.app()
+
+export default firebase;
 // reference to totos collection
 const collection = firebase.firestore().collection("todos");
 
@@ -38,3 +41,31 @@ export const deleteFbItem = async (item) => {
     console.log(err);
   });
 }; 
+export const checkInfo = async (currentUser) => {
+  const uid = currentUser.uid;
+  const userDoc = await firebase.firestore().collection("users").doc(uid).get();
+  if (!userDoc.exists) {
+    await firebase.firestore().collection("users").doc(uid).set({ name: currentUser.displayName });
+    return {
+      name: currentUser.displayName,
+      id: uid,
+    };
+  } else {
+    return {
+      id: uid,
+      ...userDoc.data(),
+    };
+  }
+} 
+
+// Configure FirebaseUI.
+export const uiConfig = {
+  // Popup signin flow rather than redirect flow.
+  signInFlow: 'popup',
+  // Redirect to /signedIn after sign in is successful. Alternatively you can provide a callbacks.signInSuccess function.
+  signInSuccessUrl: '/',
+  // We will display Google and Facebook as auth providers.
+  signInOptions: [
+    firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+  ],
+};
