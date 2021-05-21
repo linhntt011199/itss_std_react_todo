@@ -44,6 +44,7 @@ export const deleteFbItem = async (item) => {
 export const checkInfo = async (currentUser) => {
   const uid = currentUser.uid;
   const userDoc = await firebase.firestore().collection("users").doc(uid).get();
+  console.log("doc",userDoc);
   if (!userDoc.exists) {
     await firebase.firestore().collection("users").doc(uid).set({ name: currentUser.displayName });
     return {
@@ -69,3 +70,18 @@ export const uiConfig = {
     firebase.auth.GoogleAuthProvider.PROVIDER_ID,
   ],
 };
+export const updateUser = async (userId, image) => {
+    const currentUser = await firebase.firestore().collection("users").doc(userId).get();
+    if (currentUser.exists) {
+      await firebase.firestore().collection("users").doc(userId).update({ ...currentUser.data(), image: image });
+    }
+
+}
+
+export const uploadImage = async (image) => {
+  const ref = firebase.storage().ref().child(`/images/${image.name}`);
+  let downloadUrl = "";
+  await ref.put(image);
+  downloadUrl = await ref.getDownloadURL();
+  return downloadUrl;
+};  
